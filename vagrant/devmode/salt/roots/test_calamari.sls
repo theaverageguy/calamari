@@ -56,6 +56,4 @@ nosetests:
         - cwd: {{ pillar['home'] }}/calamari
         - require:
             - cmd: make-check
-            - cmd: config-tests-converged
-            - cmd: config-tests-no-bootstrap
             - file: {{ pillar['home'] }}/teuthology/archive/info.yaml
