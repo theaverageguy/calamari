@@ -1,7 +1,7 @@
 
 [testing]
 
-calamari_control = embedded
+calamari_control = external
 ceph_control = converged
 bootstrap = False
 
