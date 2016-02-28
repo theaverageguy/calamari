@@ -146,12 +146,6 @@ urlpatterns = patterns(
         calamari_rest.views.v2.EventViewSet.as_view({'get': 'list_server'})),
 
     # Log tail
-    url(r'^cluster/(?P<fsid>[a-zA-Z0-9-]+)/log$',
-        calamari_rest.views.v2.LogTailViewSet.as_view({'get': 'get_cluster_log'})),
-    url(r'^server/(?P<fqdn>[a-zA-Z0-9-\.]+)/log$',
-        calamari_rest.views.v2.LogTailViewSet.as_view({'get': 'list_server_logs'})),
-    url(r'^server/(?P<fqdn>[a-zA-Z0-9-\.]+)/log/(?P<log_path>.+)$',
-        calamari_rest.views.v2.LogTailViewSet.as_view({'get': 'get_server_log'})),
 
     # Ceph CLI access
     url(r'^cluster/(?P<fsid>[a-zA-Z0-9-]+)/cli$',

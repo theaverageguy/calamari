@@ -73,8 +73,8 @@ class ServerTestCase(TestCase):
         """
         Return an ID if cluster_count is 1, else return a list of IDs.
         """
-        self.calamari_ctl.authorize_keys(self.ceph_ctl.get_server_fqdns())
-        log.debug("Authorized keys")
+        #self.calamari_ctl.authorize_keys(self.ceph_ctl.get_server_fqdns())
+        #log.debug("Authorized keys")
 
         # Once I've authorized the keys, the first mon to retry its salt authentication
         # will cause the cluster to get noticed.

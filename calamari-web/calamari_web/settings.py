@@ -18,6 +18,10 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'mydatabase',
+    }
 }
 
 try:
@@ -25,13 +29,11 @@ try:
 except ImportError:
     pass
 else:
-    DATABASES['default'] = {
-        'ENGINE': config.get("calamari_web", "db_engine"),
-        'NAME': config.get("calamari_web", "db_name"),
-        'USER': config.get("calamari_web", "db_user"),
-        'PASSWORD': config.get("calamari_web", "db_password"),
-        'HOST': config.get("calamari_web", "db_host"),
-        'PORT': config.get("calamari_web", "db_port"),
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'mydatabase',
+        }
     }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -129,6 +131,7 @@ ROOT_URLCONF = 'calamari_web.urls'
 WSGI_APPLICATION = 'calamari_web.wsgi.application'
 
 INSTALLED_APPS = (
+    'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',

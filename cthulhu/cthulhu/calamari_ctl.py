@@ -62,25 +62,12 @@ def _initialize_db(args, config):
     from calamari_common.config import AlembicConfig
     from calamari_common.db.base import Base
 
-    # Configure postgres database
-    if os.path.exists(POSTGRES_SLS):
-        p = subprocess.Popen(["salt-call", "--local", "state.template",
-                              POSTGRES_SLS],
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        out, err = p.communicate()
-        log.debug("Postgres salt stdout: %s" % out)
-        log.debug("Postgres salt stderr: %s" % err)
-        if p.returncode != 0:
-            raise RuntimeError("salt-call for postgres failed with rc={0}".format(p.returncode))
-    else:
-        # This is the path you take if you're running in a development environment
-        log.debug("Skipping postgres configuration, SLS not found")
-
     # Cthulhu's database
     db_path = config.get('cthulhu', 'db_path')
     engine = create_engine(db_path)
     Base.metadata.reflect(engine)
     alembic_config = AlembicConfig()
+    log.info("Initializing GREGORY...")
     if ALEMBIC_TABLE in Base.metadata.tables:
         log.info("Updating database...")
         # Database already populated, migrate forward
@@ -89,11 +76,14 @@ def _initialize_db(args, config):
         log.info("Initializing database...")
         # Blank database, do initial population
         Base.metadata.create_all(engine)
+        log.info("Initializing !@#GREGORY...")
         command.stamp(alembic_config, "head")
+    log.info("Initializing GREGORY...")
 
     # Django's database
     with quiet():
         execute_from_command_line(["", "syncdb", "--noinput"])
+    log.info("Initializing GREGORY...")
 
     log.info("Initializing web interface...")
     user_model = get_user_model()
@@ -128,6 +118,7 @@ def initialize(args):
     log.info("Loading configuration..")
     config = CalamariConfig()
 
+    log.info("Loading configuration..")
     # Generate django's SECRET_KEY setting
     # Do this first, otherwise subsequent django ops will raise ImproperlyConfigured.
     # Write into a file instead of directly, so that package upgrades etc won't spuriously
@@ -136,13 +127,17 @@ def initialize(args):
         chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
         open(config.get('calamari_web', 'secret_key_path'), 'w').write(get_random_string(50, chars))
 
+    log.info("Loading configuration..")
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "calamari_web.settings")
+    log.info("Loading configuration..")
 
     try:
         _initialize_db(args, config)
-    except ImportError:
+    except Exception, e:
+        print e
         log.warning("Skipping database configuration")
 
+    log.info("Loading configuration..")
     # Django's static files
     with quiet():
         execute_from_command_line(["", "collectstatic", "--noinput"])
@@ -151,10 +146,6 @@ def initialize(args):
     # this user (probably root).  Fix it so that apache can write them later.
     apache_user = pwd.getpwnam(config.get('calamari_web', 'username'))
     os.chown(config.get('calamari_web', 'log_path'), apache_user.pw_uid, apache_user.pw_gid)
-
-    # Handle SQLite case, otherwise no chown is needed
-    if config.get('calamari_web', 'db_engine').endswith("sqlite3"):
-        os.chown(config.get('calamari_web', 'db_name'), apache_user.pw_uid, apache_user.pw_gid)
 
     # Signal supervisor to restart cthulhu as we have created its database
     log.info("Restarting services...")
